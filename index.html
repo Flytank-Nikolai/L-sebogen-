@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Den Hemmelige Læsebog</title>
+  <meta name="description" content="Et læsespil for børn fra 1. til 4. klasse. Læs ord og sætninger, saml stjerner, find sjove ord og bliv ord-detektiv.">
+  <meta name="theme-color" content="#171320">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- Uglen Ulla bruges flere steder -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="owl" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="106" rx="24" ry="6" fill="rgba(0,0,0,.10)"/>
+      <ellipse cx="60" cy="68" rx="34" ry="38" fill="#8b7cf6"/>
+      <path d="M28 46 L20 20 L48 33 Z" fill="#7a6ae8"/>
+      <path d="M92 46 L100 20 L72 33 Z" fill="#7a6ae8"/>
+      <ellipse cx="60" cy="76" rx="23" ry="28" fill="#b7adfb"/>
+      <ellipse cx="31" cy="74" rx="8" ry="19" fill="#7a6ae8" transform="rotate(10 31 74)"/>
+      <ellipse cx="89" cy="74" rx="8" ry="19" fill="#7a6ae8" transform="rotate(-10 89 74)"/>
+      <circle cx="46" cy="57" r="15" fill="#fffdf6"/>
+      <circle cx="74" cy="57" r="15" fill="#fffdf6"/>
+      <circle cx="47" cy="58" r="7" fill="#2c2a33"/>
+      <circle cx="75" cy="58" r="7" fill="#2c2a33"/>
+      <circle cx="49.5" cy="55.5" r="2.4" fill="#fff"/>
+      <circle cx="77.5" cy="55.5" r="2.4" fill="#fff"/>
+      <path d="M54 71 L60 81 L66 71 Z" fill="#ffb703"/>
+      <path d="M46 101 v8 M74 101 v8" stroke="#ffb703" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+
+  <!-- ============ FORSIDE ============ -->
+  <section id="startScreen" class="screen start-screen">
+    <div class="start-wrap">
+      <div class="start-art" aria-hidden="true">
+        <div class="cover">
+          <div class="cover-frame">
+            <p class="cover-kicker">Den hemmelige</p>
+            <p class="cover-title">Læse<br>bogen</p>
+            <p class="cover-orn">✦ ✦ ✦</p>
+            <p class="cover-bottom">Læs · leg · saml ord</p>
+          </div>
+          <div class="bookmark"></div>
+        </div>
+        <svg class="owl owl-big" viewBox="0 0 120 120"><use href="#owl"></use></svg>
+      </div>
+
+      <div class="start-copy">
+        <p class="kicker">Til 1.–4. klasse</p>
+        <h1>Den hemmelige<br><span>læsebog</span></h1>
+        <p class="lead">Læs dig gennem bogen, find sjove ord og bliv ord-detektiv. Det ligner en leg. Det er læsning.</p>
+
+        <form id="startForm" class="start-form" autocomplete="off">
+          <label for="nameInput">Hvad hedder du?</label>
+          <div class="name-row">
+            <input id="nameInput" name="name" maxlength="18" placeholder="Skriv dit navn" autocomplete="off" spellcheck="false">
+            <button class="btn accent big" type="submit" id="startBtn">Åbn bogen</button>
+          </div>
+        </form>
+
+        <div class="start-meta">
+          <span id="resumeInfo" class="resume-info" hidden></span>
+          <button id="restartBtn" class="link-btn" type="button" hidden>Begynd forfra</button>
+        </div>
+
+        <p class="micro">Ulla læser med. Tryk på ordene, hvis du er i tvivl. 📖</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPILLET ============ -->
+  <section id="game" class="screen game hidden">
+    <header class="topbar">
+      <button class="icon-btn" id="homeBtn" type="button" aria-label="Til forsiden" title="Forsiden">🏠</button>
+      <div class="chapter-label" id="chapterLabel">Kapitel 1</div>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn pill" id="dictBtn" type="button" aria-label="Åbn min ordbog" title="Min ordbog">
+        <span aria-hidden="true">📚</span><b id="dictCount">0</b>
+      </button>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Slå lyd til eller fra" aria-pressed="true" title="Lyd">🔊</button>
+      <div class="star-pill" title="Dine stjerner"><span aria-hidden="true">⭐</span><b id="starCount">0</b></div>
+    </header>
+
+    <div class="book">
+      <div class="book-cover" aria-hidden="true"></div>
+      <main class="page" id="page"></main>
+    </div>
+
+    <div class="progressbar">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="progress-text" id="progressText">Side 1</p>
+    </div>
+  </section>
+
+  <!-- ============ ORDBOG ============ -->
+  <div class="modal hidden" id="dictModal" role="dialog" aria-modal="true" aria-labelledby="dictTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="dictClose" type="button" aria-label="Luk ordbogen">✕</button>
+      <h2 id="dictTitle">Min ordbog</h2>
+      <p class="modal-sub" id="dictSub">Ord, du har læst og samlet.</p>
+      <div class="word-grid" id="wordGrid"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+  <script src="pages.js"></script>
+</body>
+</html>
